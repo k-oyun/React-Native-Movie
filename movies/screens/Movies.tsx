@@ -4,9 +4,12 @@ import {BlurView} from "expo-blur";
 import {
   ActivityIndicator,
   Dimensions,
+  FlatList,
   RefreshControl,
   ScrollView,
   StyleSheet,
+  Text,
+  View,
   useColorScheme,
 } from "react-native";
 //swiper를 이용하면 스크롤뷰와 달리 자동으로 스크롤이되는 효과를 가지고 있다
@@ -35,7 +38,7 @@ const Loader = styled.View`
   align-items: center;
 `;
 
-const TrendingScroll = styled.ScrollView`
+const TrendingScroll = styled.FlatList`
   margin-top: 20px;
 `;
 
@@ -141,20 +144,26 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
       </Swiper>
       <ListContainer>
         <ListTitle>Trending movie</ListTitle>
+        {/* scrollview와 달리 데이터를 직접 넣어주지 않아도된다. */}
         <TrendingScroll
-          contentContainerStyle={{paddingLeft: 30}}
+          data={trending}
           horizontal
           showsHorizontalScrollIndicator={false}
-        >
-          {trending.map((movie) => (
+          contentContainerStyle={{paddingHorizontal: 20}}
+          //scrollview와 달리 Flatlist는 각 item의 key를 지정해줘야함 | 똑똑하지않음
+          keyExtractor={(item) => item.id}
+          //scrollview처럼 스타일을 외부에서 입히는 것이 아닌 FlatList는  내부에서 입힘!
+          ItemSeparatorComponent={() => {
+            return <View style={{width: 20}} />;
+          }}
+          renderItem={({item}) => (
             <VMedia
-              key={movie.id}
-              posterPath={movie.poster_path}
-              originalTitle={movie.original_title}
-              voteAverage={movie.vote_average}
+              posterPath={item.poster_path}
+              originalTitle={item.original_title}
+              voteAverage={item.vote_average}
             />
-          ))}
-        </TrendingScroll>
+          )}
+        />
       </ListContainer>
       <CommingSoonTitle>Comming Soon</CommingSoonTitle>
       {upcoming.map((movie) => (
