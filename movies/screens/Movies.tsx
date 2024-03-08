@@ -20,6 +20,8 @@ import Slide from "../components/Slide";
 import Poster from "../components/Poster";
 import VMedia from "../components/VMedia";
 import HMedia from "../components/HMedia";
+import {useQuery} from "react-query";
+import {moviesApi, nowPlaying} from "../api";
 
 const ListTitle = styled.Text`
   color: white;
@@ -67,7 +69,7 @@ const VSeperator = styled.View`
   width: 20px;
 `;
 const HSeperator = styled.View`
-  width: 20px;
+  height: 20px;
 `;
 
 //화면의 높이를 알려줌 : dimension
@@ -75,11 +77,24 @@ const {height: SCREEN_HEIGHT} = Dimensions.get("window");
 
 const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
   const [refresing, setRefresing] = useState(false);
+  const {isLoading: nowPlayingLoading, data: nowPlayingData} = useQuery(
+    "nowPlaying",
+    moviesApi.nowPlaying
+  );
+
+  const {isLoading: upcomingLoading, data: upcomingData} = useQuery(
+    "upcoming",
+    moviesApi.upcoming
+  );
+  const {isLoading: trendingLoading, data: trendingData} = useQuery(
+    "trending",
+    moviesApi.trending
+  );
 
   const onRefresh = async () => {};
 
   const movieKeyExtractor = (item) => item.id + "";
-
+  const loading = nowPlayingLoading || upcomingLoading || trendingLoading;
   return loading ? (
     <Loader>
       <ActivityIndicator />
@@ -107,7 +122,8 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
               height: SCREEN_HEIGHT / 4,
             }}
           >
-            {nowPlaying.map((movie) => (
+            {/* 렌더링이 화면에 커밋 된 후에야 모든 효과를 실행하기에 null 값을 넣어주어도 에러가 해결되지않음 */}
+            {nowPlayingData.results.map((movie) => (
               <Slide
                 key={movie.id}
                 backdropPath={movie.backdrop_path}
@@ -122,7 +138,7 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
             <ListTitle>Trending movie</ListTitle>
             {/* scrollview와 달리 데이터를 직접 넣어주지 않아도된다. */}
             <TrendingScroll
-              data={trending}
+              data={trendingData.results}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{paddingHorizontal: 20}}
@@ -140,7 +156,7 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
       // refreshControl={
       //   <RefreshControl onRefresh={onRefresh} refreshing={refresing} />
       // }
-      data={upcoming}
+      data={upcomingData.results}
       keyExtractor={movieKeyExtractor}
       ItemSeparatorComponent={HSeperator}
       renderItem={renderHMedia}

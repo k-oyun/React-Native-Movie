@@ -20,6 +20,8 @@ const Tabs = () => {
         backgroundColor: isDark ? BLACK_COLOR : "white",
       }}
       screenOptions={{
+        //화면을 벗어나면 컴퍼넌트를 메모리로 부터 지워줌! 메모리 감소 효과!
+        unmountOnBlur: true,
         tabBarStyle: {
           backgroundColor: isDark ? BLACK_COLOR : "white",
         },
