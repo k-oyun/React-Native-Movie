@@ -21,16 +21,12 @@ import Poster from "../components/Poster";
 import VMedia from "../components/VMedia";
 import HMedia from "../components/HMedia";
 
-const API_KEY = "83af6f85f29b6467ef7f4bd87e80b297";
-
 const ListTitle = styled.Text`
   color: white;
   font-size: 18px;
   font-weight: 600;
   margin-left: 30px;
 `;
-
-const Container = styled.ScrollView``;
 
 const Loader = styled.View`
   flex: 1;
@@ -49,61 +45,41 @@ const ListContainer = styled.View`
 const CommingSoonTitle = styled(ListTitle)`
   margin-bottom: 20px;
 `;
+
+const renderHVMedia = ({item}) => (
+  <VMedia
+    posterPath={item.poster_path}
+    originalTitle={item.original_title}
+    voteAverage={item.vote_average}
+  />
+);
+
+const renderHMedia = ({item}) => (
+  <HMedia
+    posterPath={item.poster_path}
+    originalTitle={item.original_title}
+    overview={item.overview}
+    releaseDate={item.release_date}
+  />
+);
+
+const VSeperator = styled.View`
+  width: 20px;
+`;
+const HSeperator = styled.View`
+  width: 20px;
+`;
+
 //화면의 높이를 알려줌 : dimension
 const {height: SCREEN_HEIGHT} = Dimensions.get("window");
 
 const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
-  const [loading, setLoading] = useState(true);
-  const [nowPlaying, setNowPlaying] = useState([]);
-  const [upcoming, setUpcoming] = useState([]);
-  const [trending, setTrending] = useState([]);
   const [refresing, setRefresing] = useState(false);
 
-  //api fetch
-  const getTrending = async () => {
-    const {results} = await (
-      await fetch(
-        `https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`
-      )
-    ).json();
-    setTrending(results);
-  };
+  const onRefresh = async () => {};
 
-  //api fetch
-  const getUpcoming = async () => {
-    const {results} = await (
-      await fetch(
-        `https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}&language=en-US&page=1&region=KR`
-      )
-    ).json();
-    setUpcoming(results);
-  };
+  const movieKeyExtractor = (item) => item.id + "";
 
-  //api fetch
-  const getNowPlaying = async () => {
-    const {results} = await (
-      await fetch(
-        `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=en-US&page=1&region=KR`
-      )
-    ).json();
-    setNowPlaying(results);
-    setLoading(false);
-  };
-
-  //wait for all api fetch
-  const getData = async () => {
-    await Promise.all([getTrending(), getUpcoming(), getNowPlaying()]);
-    setLoading(false);
-  };
-  useEffect(() => {
-    getData();
-  }, []);
-
-  const onRefresh = async () => {
-    setRefresing(true);
-    await getData();
-    setRefresing(false);
-  };
   return loading ? (
     <Loader>
       <ActivityIndicator />
@@ -151,18 +127,10 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{paddingHorizontal: 20}}
               //scrollview와 달리 Flatlist는 각 item의 key를 지정해줘야함 | 똑똑하지않음
-              keyExtractor={(item) => item.id + ""}
+              keyExtractor={movieKeyExtractor}
               //scrollview처럼 스타일을 외부에서 입히는 것이 아닌 FlatList는  내부에서 입힘!
-              ItemSeparatorComponent={() => {
-                return <View style={{width: 30}} />;
-              }}
-              renderItem={({item}) => (
-                <VMedia
-                  posterPath={item.poster_path}
-                  originalTitle={item.original_title}
-                  voteAverage={item.vote_average}
-                />
-              )}
+              ItemSeparatorComponent={VSeperator}
+              renderItem={renderHVMedia}
             />
           </ListContainer>
           <CommingSoonTitle>Comming Soon</CommingSoonTitle>
@@ -173,18 +141,9 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
       //   <RefreshControl onRefresh={onRefresh} refreshing={refresing} />
       // }
       data={upcoming}
-      keyExtractor={(item) => item.id + ""}
-      ItemSeparatorComponent={() => {
-        return <View style={{height: 20}} />;
-      }}
-      renderItem={({item}) => (
-        <HMedia
-          posterPath={item.poster_path}
-          originalTitle={item.original_title}
-          overview={item.overview}
-          releaseDate={item.release_date}
-        />
-      )}
+      keyExtractor={movieKeyExtractor}
+      ItemSeparatorComponent={HSeperator}
+      renderItem={renderHMedia}
     />
   );
 };
