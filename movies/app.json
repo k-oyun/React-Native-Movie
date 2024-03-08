@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "movies",
+    "slug": "movies",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      "expo-font"
+    ]
+  },
+  "name": "movies"
+}
