@@ -109,73 +109,83 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
       <ActivityIndicator />
     </Loader>
   ) : (
-    <Container
-      //위 방향으로 드래그하여 새로고침하기
-      refreshControl={
-        <RefreshControl onRefresh={onRefresh} refreshing={refresing} />
-      }
-    >
-      <Swiper
-        horizontal
-        //반복
-        loop
-        //몇초마다 반복할지
-        autoplay
-        autoplayTimeout={3.5}
-        //스크롤을 하지 못하도록
-        showsButtons={false}
-        showsPagination={false}
-        containerStyle={{
-          marginBottom: 30,
-          width: "100%",
-          height: SCREEN_HEIGHT / 4,
-        }}
-      >
-        {nowPlaying.map((movie) => (
-          <Slide
-            key={movie.id}
-            backdropPath={movie.backdrop_path}
-            posterPath={movie.poster_path}
-            originalTitle={movie.origin_title}
-            overview={movie.overview}
-            voteAverage={movie.vote_average}
-          />
-        ))}
-      </Swiper>
-      <ListContainer>
-        <ListTitle>Trending movie</ListTitle>
-        {/* scrollview와 달리 데이터를 직접 넣어주지 않아도된다. */}
-        <TrendingScroll
-          data={trending}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{paddingHorizontal: 20}}
-          //scrollview와 달리 Flatlist는 각 item의 key를 지정해줘야함 | 똑똑하지않음
-          keyExtractor={(item) => item.id}
-          //scrollview처럼 스타일을 외부에서 입히는 것이 아닌 FlatList는  내부에서 입힘!
-          ItemSeparatorComponent={() => {
-            return <View style={{width: 20}} />;
-          }}
-          renderItem={({item}) => (
-            <VMedia
-              posterPath={item.poster_path}
-              originalTitle={item.original_title}
-              voteAverage={item.vote_average}
+    <FlatList
+      onRefresh={onRefresh}
+      refreshing={refresing}
+      //ListHeaderComponent 안에 존재하는 컴포넌트들은 상단에 고정된다.
+      ListHeaderComponent={
+        <>
+          <Swiper
+            horizontal
+            //반복
+            loop
+            //몇초마다 반복할지
+            autoplay
+            autoplayTimeout={3.5}
+            //스크롤을 하지 못하도록
+            showsButtons={false}
+            showsPagination={false}
+            containerStyle={{
+              marginBottom: 30,
+              width: "100%",
+              height: SCREEN_HEIGHT / 4,
+            }}
+          >
+            {nowPlaying.map((movie) => (
+              <Slide
+                key={movie.id}
+                backdropPath={movie.backdrop_path}
+                posterPath={movie.poster_path}
+                originalTitle={movie.origin_title}
+                overview={movie.overview}
+                voteAverage={movie.vote_average}
+              />
+            ))}
+          </Swiper>
+          <ListContainer>
+            <ListTitle>Trending movie</ListTitle>
+            {/* scrollview와 달리 데이터를 직접 넣어주지 않아도된다. */}
+            <TrendingScroll
+              data={trending}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{paddingHorizontal: 20}}
+              //scrollview와 달리 Flatlist는 각 item의 key를 지정해줘야함 | 똑똑하지않음
+              keyExtractor={(item) => item.id + ""}
+              //scrollview처럼 스타일을 외부에서 입히는 것이 아닌 FlatList는  내부에서 입힘!
+              ItemSeparatorComponent={() => {
+                return <View style={{width: 30}} />;
+              }}
+              renderItem={({item}) => (
+                <VMedia
+                  posterPath={item.poster_path}
+                  originalTitle={item.original_title}
+                  voteAverage={item.vote_average}
+                />
+              )}
             />
-          )}
-        />
-      </ListContainer>
-      <CommingSoonTitle>Comming Soon</CommingSoonTitle>
-      {upcoming.map((movie) => (
+          </ListContainer>
+          <CommingSoonTitle>Comming Soon</CommingSoonTitle>
+        </>
+      }
+      //위 방향으로 드래그하여 새로고침하기
+      // refreshControl={
+      //   <RefreshControl onRefresh={onRefresh} refreshing={refresing} />
+      // }
+      data={upcoming}
+      keyExtractor={(item) => item.id + ""}
+      ItemSeparatorComponent={() => {
+        return <View style={{height: 20}} />;
+      }}
+      renderItem={({item}) => (
         <HMedia
-          key={movie.id}
-          posterPath={movie.poster_path}
-          originalTitle={movie.original_title}
-          overview={movie.overview}
-          releaseDate={movie.release_date}
+          posterPath={item.poster_path}
+          originalTitle={item.original_title}
+          overview={item.overview}
+          releaseDate={item.release_date}
         />
-      ))}
-    </Container>
+      )}
+    />
   );
 };
 
