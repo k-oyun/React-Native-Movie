@@ -4,6 +4,7 @@ import {BlurView} from "expo-blur";
 import {
   ActivityIndicator,
   Dimensions,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   useColorScheme,
@@ -90,6 +91,7 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
   const [nowPlaying, setNowPlaying] = useState([]);
   const [upcoming, setUpcoming] = useState([]);
   const [trending, setTrending] = useState([]);
+  const [refresing, setRefresing] = useState(false);
 
   //api fetch
   const getTrending = async () => {
@@ -131,12 +133,22 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
     getData();
   }, []);
 
+  const onRefresh = async () => {
+    setRefresing(true);
+    await getData();
+    setRefresing(false);
+  };
   return loading ? (
     <Loader>
       <ActivityIndicator />
     </Loader>
   ) : (
-    <Container>
+    <Container
+      //위 방향으로 드래그하여 새로고침하기
+      refreshControl={
+        <RefreshControl onRefresh={onRefresh} refreshing={refresing} />
+      }
+    >
       <Swiper
         horizontal
         //반복
