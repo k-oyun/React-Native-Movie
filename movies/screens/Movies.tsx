@@ -20,7 +20,7 @@ import Slide from "../components/Slide";
 import Poster from "../components/Poster";
 import VMedia from "../components/VMedia";
 import HMedia from "../components/HMedia";
-import {useQuery} from "react-query";
+import {useQuery, useQueryClient} from "react-query";
 import {moviesApi, nowPlaying} from "../api";
 
 const ListTitle = styled.Text`
@@ -76,25 +76,37 @@ const HSeperator = styled.View`
 const {height: SCREEN_HEIGHT} = Dimensions.get("window");
 
 const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
-  const [refresing, setRefresing] = useState(false);
-  const {isLoading: nowPlayingLoading, data: nowPlayingData} = useQuery(
-    "nowPlaying",
-    moviesApi.nowPlaying
-  );
+  const queryClient = useQueryClient();
+  const [nowPlaying, setNowPlaying] = useState([]);
+  const {
+    isLoading: nowPlayingLoading,
+    data: nowPlayingData,
 
-  const {isLoading: upcomingLoading, data: upcomingData} = useQuery(
-    "upcoming",
-    moviesApi.upcoming
-  );
-  const {isLoading: trendingLoading, data: trendingData} = useQuery(
-    "trending",
-    moviesApi.trending
-  );
+    isRefetching: isRefectingNowPlaying,
+  } = useQuery(["movies", "nowPlaying"], moviesApi.nowPlaying);
 
-  const onRefresh = async () => {};
+  const {
+    isLoading: upcomingLoading,
+    data: upcomingData,
+
+    isRefetching: isRefetchingUpcoming,
+  } = useQuery(["movies", "upcoming"], moviesApi.upcoming);
+  const {
+    isLoading: trendingLoading,
+    data: trendingData,
+
+    isRefetching: isrefetchingTrending,
+  } = useQuery(["movies", "trending"], moviesApi.trending);
+
+  const onRefresh = async () => {
+    //movies라는 키를 가진 쿼리를 전부 fetch할 수 있음
+    queryClient.refetchQueries(["movies"]);
+  };
 
   const movieKeyExtractor = (item) => item.id + "";
   const loading = nowPlayingLoading || upcomingLoading || trendingLoading;
+  const refreshing =
+    isRefectingNowPlaying || isRefetchingUpcoming || isrefetchingTrending;
   return loading ? (
     <Loader>
       <ActivityIndicator />
@@ -102,7 +114,7 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
   ) : (
     <FlatList
       onRefresh={onRefresh}
-      refreshing={refresing}
+      refreshing={refreshing}
       //ListHeaderComponent 안에 존재하는 컴포넌트들은 상단에 고정된다.
       ListHeaderComponent={
         <>
@@ -123,16 +135,17 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
             }}
           >
             {/* 렌더링이 화면에 커밋 된 후에야 모든 효과를 실행하기에 null 값을 넣어주어도 에러가 해결되지않음 */}
-            {nowPlayingData.results.map((movie) => (
-              <Slide
-                key={movie.id}
-                backdropPath={movie.backdrop_path}
-                posterPath={movie.poster_path}
-                originalTitle={movie.origin_title}
-                overview={movie.overview}
-                voteAverage={movie.vote_average}
-              />
-            ))}
+            {nowPlaying &&
+              nowPlayingData.results.map((movie) => (
+                <Slide
+                  key={movie.id}
+                  backdropPath={movie.backdrop_path}
+                  posterPath={movie.poster_path}
+                  originalTitle={movie.origin_title}
+                  overview={movie.overview}
+                  voteAverage={movie.vote_average}
+                />
+              ))}
           </Swiper>
           <ListContainer>
             <ListTitle>Trending movie</ListTitle>
