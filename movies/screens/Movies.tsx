@@ -15,6 +15,8 @@ import styled from "styled-components/native";
 import {makeImgPath} from "../utils";
 import Slide from "../components/Slide";
 import Poster from "../components/Poster";
+import VMedia from "../components/VMedia";
+import HMedia from "../components/HMedia";
 
 const API_KEY = "83af6f85f29b6467ef7f4bd87e80b297";
 
@@ -37,51 +39,12 @@ const TrendingScroll = styled.ScrollView`
   margin-top: 20px;
 `;
 
-const Movie = styled.View`
-  margin-right: 20px;
-  align-items: center;
-`;
-
-const Title = styled.Text`
-  color: white;
-  font-weight: 600;
-  margin-top: 7px;
-  margin-bottom: 5px;
-`;
-const Votes = styled.Text`
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 10px;
-`;
-
 const ListContainer = styled.View`
   margin-bottom: 40px;
 `;
 
-const HMovie = styled.View`
-  padding: 0px 30px;
-  flex-direction: row;
-  margin-bottom: 30px;
-`;
-
-const HColumn = styled.View`
-  margin-left: 15px;
-  width: 80%;
-`;
-
-const Overview = styled.Text`
-  color: white;
-  opacity: 0.7;
-  width: 80%;
-`;
-
-const Release = styled.Text`
-  color: white;
-  font-size: 12px;
-  margin-vertical: 10px;
-`;
-
 const CommingSoonTitle = styled(ListTitle)`
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 `;
 //화면의 높이를 알려줌 : dimension
 const {height: SCREEN_HEIGHT} = Dimensions.get("window");
@@ -184,44 +147,24 @@ const Movies: React.FC<NativeStackScreenProps<any, "Movies">> = () => {
           showsHorizontalScrollIndicator={false}
         >
           {trending.map((movie) => (
-            <Movie key={movie.id}>
-              <Poster path={movie.poster_path} />
-              {/* 제목이 긴 영화는 13까지만 */}
-              {/* 13보다 길면 ...로 대체 */}
-              <Title>
-                {movie.original_title.slice(0, 13)}
-                {movie.original_title.length > 13 ? "..." : null}
-              </Title>
-
-              <Votes>
-                {movie.vote_average > 0
-                  ? `⭐️${movie.vote_average}/10`
-                  : `Comming soon`}
-              </Votes>
-            </Movie>
+            <VMedia
+              key={movie.id}
+              posterPath={movie.poster_path}
+              originalTitle={movie.original_title}
+              voteAverage={movie.vote_average}
+            />
           ))}
         </TrendingScroll>
       </ListContainer>
       <CommingSoonTitle>Comming Soon</CommingSoonTitle>
       {upcoming.map((movie) => (
-        <HMovie key={movie.id}>
-          <Poster path={movie.poster_path} />
-          <HColumn>
-            <Title>{movie.original_title}</Title>
-            <Release>
-              {new Date(movie.release_date).toLocaleDateString("ko", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </Release>
-            <Overview>
-              {movie.overview !== "" && movie.overview.length > 80
-                ? `${movie.overview.slice(0, 140)}...`
-                : movie.overview}
-            </Overview>
-          </HColumn>
-        </HMovie>
+        <HMedia
+          key={movie.id}
+          posterPath={movie.poster_path}
+          originalTitle={movie.original_title}
+          overview={movie.overview}
+          releaseDate={movie.release_date}
+        />
       ))}
     </Container>
   );
